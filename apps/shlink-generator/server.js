@@ -16,6 +16,39 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Endpoint per testare la connessione con Shlink
+app.get('/api/test-connection', async (req, res) => {
+    try {
+        const response = await axios({
+            method: 'GET',
+            url: `${SHLINK_BASE_URL}/rest/v3/short-urls`,
+            headers: {
+                'X-Api-Key': SHLINK_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        res.json({
+            success: true,
+            message: 'Connessione a Shlink OK',
+            data: {
+                totalShortUrls: response.data.shortUrls?.pagination?.totalItems || 'N/A'
+            }
+        });
+    } catch (error) {
+        console.error('Test connessione fallito:', error.response?.data || error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Connessione fallita',
+            details: {
+                status: error.response?.status,
+                message: error.message,
+                data: error.response?.data
+            }
+        });
+    }
+});
+
 // Endpoint per creare shortlink
 app.post('/api/create-shortlink', async (req, res) => {
     try {
