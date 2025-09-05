@@ -1,0 +1,12 @@
+{
+  "name": "password-generator",
+  "version": "1.0.0",
+  "description": "Generatore password sicure con export CSV",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
