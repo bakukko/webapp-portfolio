@@ -2,22 +2,19 @@ class PasswordGenerator {
     constructor() {
         this.initElements();
         this.initEventListeners();
-        this.generatedPasswords = [];
     }
 
     initElements() {
         this.lengthSlider = document.getElementById('length');
         this.lengthValue = document.getElementById('lengthValue');
         this.countInput = document.getElementById('count');
+        this.prefixInput = document.getElementById('prefix');
         this.lowercaseCheck = document.getElementById('lowercase');
         this.uppercaseCheck = document.getElementById('uppercase');
         this.numbersCheck = document.getElementById('numbers');
         this.symbolsCheck = document.getElementById('symbols');
+        this.excludeAmbiguousCheck = document.getElementById('excludeAmbiguous');
         this.generateBtn = document.getElementById('generateBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.clearBtn = document.getElementById('clearBtn');
-        this.resultsSection = document.getElementById('resultsSection');
-        this.passwordsList = document.getElementById('passwordsList');
     }
 
     initEventListeners() {
@@ -25,108 +22,96 @@ class PasswordGenerator {
             this.lengthValue.textContent = this.lengthSlider.value;
         });
 
-        this.generateBtn.addEventListener('click', () => this.generatePasswords());
-        this.downloadBtn.addEventListener('click', () => this.downloadCSV());
-        this.clearBtn.addEventListener('click', () => this.clearResults());
+        this.generateBtn.addEventListener('click', () => this.generateAndDownload());
+        
+        // Validazione in tempo reale
+        this.prefixInput.addEventListener('input', () => this.validateForm());
+        this.lengthSlider.addEventListener('input', () => this.validateForm());
     }
 
-    async generatePasswords() {
+    validateForm() {
+        const prefixLength = this.prefixInput.value.length;
+        const totalLength = parseInt(this.lengthSlider.value);
+        
+        if (prefixLength >= totalLength) {
+            this.generateBtn.disabled = true;
+            this.generateBtn.textContent = 'Prefisso troppo lungo';
+        } else {
+            this.generateBtn.disabled = false;
+            this.generateBtn.textContent = 'Genera e Scarica CSV';
+        }
+    }
+
+    async generateAndDownload() {
         const options = {
             length: parseInt(this.lengthSlider.value),
+            count: parseInt(this.countInput.value),
+            prefix: this.prefixInput.value.trim(),
             includeLowercase: this.lowercaseCheck.checked,
             includeUppercase: this.uppercaseCheck.checked,
             includeNumbers: this.numbersCheck.checked,
-            includeSymbols: this.symbolsCheck.checked
+            includeSymbols: this.symbolsCheck.checked,
+            excludeAmbiguous: this.excludeAmbiguousCheck.checked
         };
 
-        const count = parseInt(this.countInput.value);
-
+        // Validazioni
         if (!options.includeLowercase && !options.includeUppercase && 
             !options.includeNumbers && !options.includeSymbols) {
             alert('Seleziona almeno un tipo di carattere!');
             return;
         }
 
-        try {
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ...options, count })
-            });
-
-            const passwords = await response.json();
-            this.generatedPasswords = passwords;
-            this.displayPasswords();
-        } catch (error) {
-            alert('Errore nella generazione delle password');
+        if (options.prefix.length >= options.length) {
+            alert('Il prefisso è troppo lungo rispetto alla lunghezza della password!');
+            return;
         }
-    }
 
-    displayPasswords() {
-        this.passwordsList.innerHTML = '';
-        
-        this.generatedPasswords.forEach((item, index) => {
-            const passwordDiv = document.createElement('div');
-            passwordDiv.className = 'password-item';
-            passwordDiv.innerHTML = `
-                <span class="password-text">${item.password}</span>
-                <button class="copy-btn" onclick="passwordGen.copyToClipboard('${item.password}', ${index})">
-                    Copia
-                </button>
-            `;
-            this.passwordsList.appendChild(passwordDiv);
-        });
-
-        this.resultsSection.style.display = 'block';
-    }
-
-    copyToClipboard(password, index) {
-        navigator.clipboard.writeText(password).then(() => {
-            const btn = document.querySelectorAll('.copy-btn')[index];
-            const originalText = btn.textContent;
-            btn.textContent = 'Copiato!';
-            btn.style.background = '#28a745';
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = '#007bff';
-            }, 1000);
-        });
-    }
-
-    async downloadCSV() {
-        if (this.generatedPasswords.length === 0) {
-            alert('Nessuna password da scaricare!');
+        if (options.count > 10000) {
+            alert('Massimo 10.000 password per volta!');
             return;
         }
 
         try {
-            const response = await fetch('/api/download-csv', {
+            this.generateBtn.disabled = true;
+            this.generateBtn.textContent = 'Generazione in corso...';
+
+            const response = await fetch('/api/generate-csv', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ passwords: this.generatedPasswords })
+                body: JSON.stringify(options)
             });
+
+            if (!response.ok) {
+                throw new Error('Errore del server');
+            }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'passwords.csv';
+            a.download = `passwords_${new Date().getTime()}.csv`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        } catch (error) {
-            alert('Errore nel download del CSV');
-        }
-    }
 
-    clearResults() {
-        this.generatedPasswords = [];
-        this.passwordsList.innerHTML = '';
-        this.resultsSection.style.display = 'none';
+            // Feedback successo
+            this.generateBtn.textContent = 'Download completato!';
+            this.generateBtn.style.background = '#28a745';
+            
+            setTimeout(() => {
+                this.generateBtn.textContent = 'Genera e Scarica CSV';
+                this.generateBtn.style.background = '';
+                this.generateBtn.disabled = false;
+            }, 2000);
+
+        } catch (error) {
+            alert('Errore nella generazione delle password: ' + error.message);
+            this.generateBtn.disabled = false;
+            this.generateBtn.textContent = 'Genera e Scarica CSV';
+        }
     }
 }
 
