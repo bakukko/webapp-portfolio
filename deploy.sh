@@ -1,19 +1,39 @@
 #!/bin/sh
 echo "Starting deployment..."
 
-# Installa dipendenze
-npm run install-all
+# Kill existing processes
+pkill -f "node server.js" || true
+sleep 2
 
-# Avvia dashboard sulla porta 3000
-cd /app/dashboard && npm start &
-
-# Avvia app1 sulla porta 3001
-cd /app/apps/app1 && PORT=3001 npm start &
-
-# Avvia bot telegram se esiste
-if [ -d "/app/apps/bot-telegram" ]; then
-    cd /app/apps/bot-telegram && npm start &
+# Pull latest code if in git repo
+if [ -d ".git" ]; then
+    git pull origin main
 fi
 
-# Mantieni il processo attivo
+# Install dependencies
+npm install
+
+# Install dependencies for each app
+if [ -d "dashboard" ]; then
+    cd dashboard && npm install && cd ..
+fi
+
+if [ -d "apps/password-generator" ]; then
+    cd apps/password-generator && npm install && cd ../..
+fi
+
+# Start applications in background
+echo "Starting dashboard..."
+cd dashboard && node server.js &
+DASHBOARD_PID=$!
+
+echo "Starting password generator..."
+cd ../apps/password-generator && PORT=3001 node server.js &
+GENERATOR_PID=$!
+
+echo "Dashboard PID: $DASHBOARD_PID"
+echo "Generator PID: $GENERATOR_PID"
+echo "Applications started successfully"
+
+# Wait for all background processes
 wait
