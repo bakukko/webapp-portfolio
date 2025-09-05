@@ -286,6 +286,13 @@ app.get('/', (req, res) => {
               Apri Applicazione
             </a>
           </article>
+          <article class="app-card">
+            <h3>🔗 Short link Generator</h3>
+            <p>Generatore di short link e QRcode.</p>
+            <a href="https://app2.rossettimauro.work" class="app-link" target="_blank" rel="noopener">
+              Apri Applicazione
+            </a>
+          </article>
           
           <!-- Puoi aggiungere altre app qui -->
           <article class="app-card">
