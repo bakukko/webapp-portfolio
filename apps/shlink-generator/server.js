@@ -59,6 +59,18 @@ app.post('/api/create-shortlink', async (req, res) => {
             return res.status(400).json({ error: 'URL è obbligatorio' });
         }
 
+        // Preparazione dati per Shlink API
+        const shlinkData = {
+            longUrl: url,
+            tags: ['temporaneo'],
+            findIfExists: true
+        };
+        
+        // Aggiungi slug solo se presente
+        if (slug && slug.trim()) {
+            shlinkData.customSlug = slug.trim();
+        }
+
         // Configurazione richiesta Shlink API
         const shlinkConfig = {
             method: 'POST',
@@ -67,12 +79,7 @@ app.post('/api/create-shortlink', async (req, res) => {
                 'X-Api-Key': SHLINK_API_KEY,
                 'Content-Type': 'application/json'
             },
-            data: {
-                longUrl: url,
-                customSlug: slug || undefined,
-                tags: ['temporaneo'],
-                findIfExists: true
-            }
+            data: shlinkData
         };
 
         console.log('Chiamata Shlink API:', shlinkConfig);
