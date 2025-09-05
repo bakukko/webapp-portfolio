@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Generator - Bakukko</title>
+    <title>Password Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,8 +23,8 @@
 
             <div class="form-group">
                 <label for="length">Lunghezza password:</label>
-                <input type="range" id="length" min="4" max="50" value="12">
-                <span id="lengthValue">12</span>
+                <input type="range" id="length" min="4" max="50" value="8">
+                <span id="lengthValue">8</span>
             </div>
 
             <div class="form-group">
@@ -35,22 +35,14 @@
             <div class="checkbox-group">
                 <label><input type="checkbox" id="lowercase" checked> Lettere minuscole (a-z)</label>
                 <label><input type="checkbox" id="uppercase" checked> Lettere maiuscole (A-Z)</label>
-                <label><input type="checkbox" id="numbers" checked> Numeri (0-9)</label>
+                <label><input type="checkbox" id="numbers"> Numeri (0-9)</label>
                 <label><input type="checkbox" id="symbols"> Simboli (!@#$%^&*)</label>
                 <label><input type="checkbox" id="excludeAmbiguous" checked> Escludi caratteri ambigui (0,O,1,l,I,|)</label>
             </div>
 
             <button id="generateBtn" class="btn-primary">Genera e Scarica CSV</button>
             
-            <div class="info-box">
-                <h3>Informazioni:</h3>
-                <ul>
-                    <li>Le password generate sono tutte diverse tra loro</li>
-                    <li>Il file CSV conterrà solo la lista delle password</li>
-                    <li>I caratteri ambigui possono essere esclusi per maggiore leggibilità</li>
-                    <li>Il prefisso verrà aggiunto all'inizio di ogni password</li>
-                </ul>
-            </div>
+            
         </div>
     </div>
 
