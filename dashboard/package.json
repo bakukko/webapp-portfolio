@@ -1,0 +1,13 @@
+{
+  "name": "webapp-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio webapp e bot Telegram",
+  "scripts": {
+    "dev": "concurrently \"cd dashboard && npm run dev\" \"cd apps/app1 && npm run dev\"",
+    "start": "node deploy.js",
+    "install-all": "npm install && cd dashboard && npm install && cd apps/app1 && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
