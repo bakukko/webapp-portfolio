@@ -538,6 +538,14 @@ app.get('/', (req, res) => {
           </article>
           
           <article class="app-card">
+            <h3>🔗 Short Link Generator</h3>
+            <p>Crea collegamenti brevi e personalizzati per condividere facilmente i tuoi link con statistiche di utilizzo avanzate.</p>
+            <a href="https://app2.rossettimauro.work" class="app-link" target="_blank" rel="noopener">
+              Apri Applicazione
+            </a>
+          </article>
+          
+          <article class="app-card">
             <h3>⚙️ Admin Panel</h3>
             <p>Pannello di controllo per gestire deployments, visualizzare commit e fare pull manuali del codice.</p>
             <a href="/manual-pull" class="admin-link">
