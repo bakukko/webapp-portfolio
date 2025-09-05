@@ -75,6 +75,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            margin-bottom: 10px;
         }
 
         .button:hover {
@@ -87,6 +88,10 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
         }
 
         .loading {
@@ -200,10 +205,33 @@
             border-left: 4px solid #dc3545;
         }
 
+        .success {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #28a745;
+        }
+
         .info-text {
             color: #6c757d;
             font-size: 14px;
             margin-top: 8px;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         @media (max-width: 600px) {
@@ -248,14 +276,19 @@
             <button type="submit" class="button" id="submitBtn">
                 Crea Short Link
             </button>
+            
+            <button type="button" class="button test-button" id="testBtn">
+                🔍 Test Connessione API
+            </button>
         </form>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Creazione short link in corso...</p>
+            <p>Elaborazione in corso...</p>
         </div>
 
         <div class="error" id="error"></div>
+        <div class="success" id="success"></div>
 
         <div class="result" id="result">
             <h3 style="margin-bottom: 20px; color: #333;">✅ Short Link Creato!</h3>
@@ -277,9 +310,13 @@
     </div>
 
     <script>
+        console.log('Script caricato');
+        
+        // Elementi DOM
         const form = document.getElementById('shortlinkForm');
         const loading = document.getElementById('loading');
         const error = document.getElementById('error');
+        const success = document.getElementById('success');
         const result = document.getElementById('result');
         const shortlinkUrl = document.getElementById('shortlinkUrl');
         const copyBtn = document.getElementById('copyBtn');
@@ -288,42 +325,84 @@
         const submitBtn = document.getElementById('submitBtn');
         const testBtn = document.getElementById('testBtn');
 
+        // Funzioni di utilità
+        function showLoading() {
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            success.style.display = 'none';
+            result.style.display = 'none';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        function showError(message, details = null) {
+            error.innerHTML = message;
+            if (details) {
+                error.innerHTML += '<div class="debug-info">' + JSON.stringify(details, null, 2) + '</div>';
+            }
+            error.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            success.innerHTML = message;
+            success.style.display = 'block';
+        }
+
+        function resetMessages() {
+            error.style.display = 'none';
+            success.style.display = 'none';
+            result.style.display = 'none';
+        }
+
         // Test connessione API
-        testBtn.addEventListener('click', async () => {
+        testBtn.addEventListener('click', async function() {
+            console.log('Test connessione cliccato');
+            
+            const originalText = testBtn.textContent;
             testBtn.disabled = true;
             testBtn.textContent = 'Testing...';
-            
+            resetMessages();
+            showLoading();
+
             try {
                 const response = await fetch('/api/test-connection');
                 const data = await response.json();
                 
+                console.log('Risposta test:', data);
+                
                 if (data.success) {
-                    alert('✅ Connessione API OK!\n\nShlink è raggiungibile e l\'API key funziona.');
+                    showSuccess('✅ Connessione API OK! Shlink è raggiungibile.');
                 } else {
-                    alert('❌ Errore connessione:\n\n' + JSON.stringify(data.details, null, 2));
+                    showError('❌ Errore connessione API', data.details);
                 }
             } catch (err) {
-                alert('❌ Errore di rete:\n\n' + err.message);
+                console.error('Errore test:', err);
+                showError('❌ Errore di rete: ' + err.message);
             } finally {
+                hideLoading();
                 testBtn.disabled = false;
-                testBtn.textContent = '🔍 Test Connessione API';
+                testBtn.textContent = originalText;
             }
         });
 
-        form.addEventListener('submit', async (e) => {
+        // Creazione shortlink
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('Form submitted');
             
-            // Reset UI
-            loading.style.display = 'block';
-            error.style.display = 'none';
-            result.style.display = 'none';
             submitBtn.disabled = true;
+            resetMessages();
+            showLoading();
             
             const formData = new FormData(form);
             const data = {
                 url: formData.get('url'),
-                slug: formData.get('slug')
+                slug: formData.get('slug') || undefined
             };
+
+            console.log('Dati da inviare:', data);
 
             try {
                 const response = await fetch('/api/create-shortlink', {
@@ -335,6 +414,7 @@
                 });
 
                 const responseData = await response.json();
+                console.log('Risposta server:', responseData);
 
                 if (!response.ok) {
                     throw new Error(responseData.error || 'Errore nella creazione del link');
@@ -347,19 +427,19 @@
                 downloadBtn.download = `qrcode-${responseData.slug || 'shortlink'}.png`;
                 
                 result.style.display = 'block';
+                showSuccess('Short link creato con successo!');
                 
             } catch (err) {
                 console.error('Errore:', err);
-                error.textContent = err.message || 'Errore nella creazione del short link';
-                error.style.display = 'block';
+                showError('Errore nella creazione del short link: ' + err.message);
             } finally {
-                loading.style.display = 'none';
+                hideLoading();
                 submitBtn.disabled = false;
             }
         });
 
         // Funzione copia negli appunti
-        copyBtn.addEventListener('click', async () => {
+        copyBtn.addEventListener('click', async function() {
             try {
                 await navigator.clipboard.writeText(shortlinkUrl.textContent);
                 
@@ -374,15 +454,16 @@
                 
             } catch (err) {
                 console.error('Errore nella copia:', err);
-                alert('Impossibile copiare il link');
+                showError('Impossibile copiare il link negli appunti');
             }
         });
 
-        // Reset form quando si clicca di nuovo su un input
-        document.getElementById('url').addEventListener('focus', () => {
-            result.style.display = 'none';
-            error.style.display = 'none';
+        // Reset quando si clicca su un input
+        document.getElementById('url').addEventListener('focus', function() {
+            resetMessages();
         });
+
+        console.log('Tutti gli event listener aggiunti');
     </script>
 </body>
 </html>
