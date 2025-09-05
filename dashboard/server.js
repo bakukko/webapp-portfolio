@@ -8,7 +8,7 @@ app.use(express.json());
 
 // Endpoint webhook per aggiornamenti automatici da GitHub
 app.post('/webhook', (req, res) => {
-  console.log('Webhook ricevuto da GitHub');
+  console.log('Webhook ricevuto da GitHub'); 
   
   exec('cd /app && git pull origin main', (error, stdout, stderr) => {
     if (error) {
