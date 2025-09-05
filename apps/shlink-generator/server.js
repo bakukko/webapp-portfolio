@@ -74,7 +74,7 @@ app.post('/api/create-shortlink', async (req, res) => {
         // Configurazione richiesta Shlink API
         const shlinkConfig = {
             method: 'POST',
-            url: `${SHLINK_BASE_URL}/rest/v3/short-urls`,
+            url: `${SHLINK_BASE_URL}/rest/v2/short-urls`,
             headers: {
                 'X-Api-Key': SHLINK_API_KEY,
                 'Content-Type': 'application/json'
