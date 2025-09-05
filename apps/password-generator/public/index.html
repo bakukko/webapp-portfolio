@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Password Generator</h1>
+            <p>Genera password sicure personalizzabili</p>
+        </header>
+
+        <div class="generator-section">
+            <h2>Configurazione</h2>
+            <div class="form-group">
+                <label for="length">Lunghezza password:</label>
+                <input type="range" id="length" min="4" max="50" value="12">
+                <span id="lengthValue">12</span>
+            </div>
+
+            <div class="form-group">
+                <label for="count">Numero password da generare:</label>
+                <input type="number" id="count" min="1" max="500" value="1">
+            </div>
+
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="lowercase" checked> Lettere minuscole (a-z)</label>
+                <label><input type="checkbox" id="uppercase" checked> Lettere maiuscole (A-Z)</label>
+                <label><input type="checkbox" id="numbers" checked> Numeri (0-9)</label>
+                <label><input type="checkbox" id="symbols"> Simboli (!@#$%^&*)</label>
+            </div>
+
+            <button id="generateBtn" class="btn-primary">Genera Password</button>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2>Password Generate</h2>
+            <div id="passwordsList"></div>
+            <div class="actions">
+                <button id="downloadBtn" class="btn-secondary">Scarica CSV</button>
+                <button id="clearBtn" class="btn-tertiary">Cancella Tutto</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
