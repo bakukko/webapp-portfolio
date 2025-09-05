@@ -24,7 +24,7 @@ function generateUniquePasswords(options) {
   // Rimuovi caratteri ambigui se richiesto
   if (options.excludeAmbiguous) {
     for (let char of ambiguousChars) {
-      charset = charset.replace(new RegExp(char, 'g'), '');
+      charset = charset.replace(new RegExp(char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '');
     }
   }
   
@@ -32,8 +32,10 @@ function generateUniquePasswords(options) {
   
   const passwords = new Set(); // Usa Set per garantire unicità
   const prefix = options.prefix || '';
+  const maxAttempts = options.count * 10; // Evita loop infiniti
+  let attempts = 0;
   
-  while (passwords.size < options.count) {
+  while (passwords.size < options.count && attempts < maxAttempts) {
     let password = prefix;
     const remainingLength = options.length - prefix.length;
     
@@ -44,6 +46,7 @@ function generateUniquePasswords(options) {
     }
     
     passwords.add(password);
+    attempts++;
   }
   
   return Array.from(passwords);
@@ -51,22 +54,70 @@ function generateUniquePasswords(options) {
 
 // API per generare e scaricare CSV direttamente
 app.post('/api/generate-csv', (req, res) => {
-  const options = req.body;
-  
   try {
+    const options = {
+      length: parseInt(req.body.length) || 12,
+      count: parseInt(req.body.count) || 1,
+      prefix: req.body.prefix || '',
+      includeLowercase: req.body.includeLowercase !== false,
+      includeUppercase: req.body.includeUppercase !== false,
+      includeNumbers: req.body.includeNumbers !== false,
+      includeSymbols: req.body.includeSymbols || false,
+      excludeAmbiguous: req.body.excludeAmbiguous || false
+    };
+
+    // Validazioni
+    if (options.count > 10000) {
+      return res.status(400).json({ error: 'Massimo 10.000 password per volta' });
+    }
+
+    if (options.length < 1 || options.length > 50) {
+      return res.status(400).json({ error: 'Lunghezza deve essere tra 1 e 50 caratteri' });
+    }
+
+    if (options.prefix.length >= options.length) {
+      return res.status(400).json({ error: 'Prefisso troppo lungo' });
+    }
+
+    if (!options.includeLowercase && !options.includeUppercase && 
+        !options.includeNumbers && !options.includeSymbols) {
+      return res.status(400).json({ error: 'Seleziona almeno un tipo di carattere' });
+    }
+    
     const passwords = generateUniquePasswords(options);
     
     // Crea CSV con solo la lista dei codici (una password per riga)
-    let csv = passwords.join('\n');
+    const csv = passwords.join('\n');
     
-    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="passwords.csv"');
     res.send(csv);
+    
   } catch (error) {
-    res.status(500).json({ error: 'Errore nella generazione delle password' });
+    console.error('Errore generazione password:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
   }
+});
+
+// Endpoint di test
+app.get('/test', (req, res) => {
+  res.json({ 
+    status: 'Password Generator attivo',
+    timestamp: new Date().toISOString(),
+    port: PORT
+  });
+});
+
+// Homepage semplice per test diretto
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>Password Generator API</h1>
+    <p>Servizio attivo sulla porta ${PORT}</p>
+    <p><a href="/test">Test endpoint</a></p>
+  `);
 });
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Password Generator running on port ${PORT}`);
+  console.log('Endpoint disponibile: POST /api/generate-csv');
 });
