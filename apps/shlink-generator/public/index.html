@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shlink Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .shortlink-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e1e1e1;
+        }
+
+        .shortlink {
+            flex: 1;
+            font-size: 18px;
+            color: #667eea;
+            font-weight: 600;
+            margin-right: 15px;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .copy-btn.copied {
+            background: #6c757d;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .qr-code {
+            max-width: 200px;
+            height: auto;
+            border: 10px solid white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+
+        .download-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        .error {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .info-text {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .shortlink-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .shortlink {
+                margin-right: 0;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Shlink Generator</h1>
+        
+        <form id="shortlinkForm">
+            <div class="form-group">
+                <label for="url">URL Originale *</label>
+                <input type="url" id="url" name="url" required placeholder="https://esempio.com">
+                <div class="info-text">Inserisci l'URL completo che vuoi accorciare</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="slug">Slug Personalizzato (opzionale)</label>
+                <input type="text" id="slug" name="slug" placeholder="mio-link">
+                <div class="info-text">Se vuoto, verrà generato automaticamente</div>
+            </div>
+            
+            <button type="submit" class="button" id="submitBtn">
+                Crea Short Link
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Creazione short link in corso...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="result" id="result">
+            <h3 style="margin-bottom: 20px; color: #333;">✅ Short Link Creato!</h3>
+            
+            <div class="shortlink-container">
+                <span class="shortlink" id="shortlinkUrl"></span>
+                <button class="copy-btn" id="copyBtn">Copia</button>
+            </div>
+
+            <div class="qr-section">
+                <h4 style="margin-bottom: 15px; color: #555;">QR Code</h4>
+                <img class="qr-code" id="qrImage" alt="QR Code">
+                <br>
+                <a class="download-btn" id="downloadBtn" download="qrcode.png">
+                    📥 Scarica QR Code
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('shortlinkForm');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
+        const shortlinkUrl = document.getElementById('shortlinkUrl');
+        const copyBtn = document.getElementById('copyBtn');
+        const qrImage = document.getElementById('qrImage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Reset UI
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            result.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(form);
+            const data = {
+                url: formData.get('url'),
+                slug: formData.get('slug')
+            };
+
+            try {
+                const response = await fetch('/api/create-shortlink', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(responseData.error || 'Errore nella creazione del link');
+                }
+
+                // Mostra risultati
+                shortlinkUrl.textContent = responseData.shortUrl;
+                qrImage.src = responseData.qrCode;
+                downloadBtn.href = responseData.qrCode;
+                downloadBtn.download = `qrcode-${responseData.slug || 'shortlink'}.png`;
+                
+                result.style.display = 'block';
+                
+            } catch (err) {
+                console.error('Errore:', err);
+                error.textContent = err.message || 'Errore nella creazione del short link';
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Funzione copia negli appunti
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(shortlinkUrl.textContent);
+                
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copiato!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Errore nella copia:', err);
+                alert('Impossibile copiare il link');
+            }
+        });
+
+        // Reset form quando si clicca di nuovo su un input
+        document.getElementById('url').addEventListener('focus', () => {
+            result.style.display = 'none';
+            error.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
