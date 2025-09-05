@@ -286,6 +286,29 @@
         const qrImage = document.getElementById('qrImage');
         const downloadBtn = document.getElementById('downloadBtn');
         const submitBtn = document.getElementById('submitBtn');
+        const testBtn = document.getElementById('testBtn');
+
+        // Test connessione API
+        testBtn.addEventListener('click', async () => {
+            testBtn.disabled = true;
+            testBtn.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/test-connection');
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Connessione API OK!\n\nShlink è raggiungibile e l\'API key funziona.');
+                } else {
+                    alert('❌ Errore connessione:\n\n' + JSON.stringify(data.details, null, 2));
+                }
+            } catch (err) {
+                alert('❌ Errore di rete:\n\n' + err.message);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '🔍 Test Connessione API';
+            }
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
