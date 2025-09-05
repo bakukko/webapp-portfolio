@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Generator</title>
+    <title>Password Generator - Bakukko</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🔐 Password Generator</h1>
-            <p>Genera password sicure personalizzabili</p>
+            <h1>Password Generator</h1>
+            <p>Genera password sicure e scarica il CSV</p>
         </header>
 
         <div class="generator-section">
             <h2>Configurazione</h2>
+            
+            <div class="form-group">
+                <label for="count">Numero password da generare:</label>
+                <input type="number" id="count" min="1" max="10000" value="10">
+            </div>
+
             <div class="form-group">
                 <label for="length">Lunghezza password:</label>
                 <input type="range" id="length" min="4" max="50" value="12">
@@ -22,8 +28,8 @@
             </div>
 
             <div class="form-group">
-                <label for="count">Numero password da generare:</label>
-                <input type="number" id="count" min="1" max="500" value="1">
+                <label for="prefix">Prefisso (opzionale):</label>
+                <input type="text" id="prefix" placeholder="es: PWD_" maxlength="10">
             </div>
 
             <div class="checkbox-group">
@@ -31,17 +37,19 @@
                 <label><input type="checkbox" id="uppercase" checked> Lettere maiuscole (A-Z)</label>
                 <label><input type="checkbox" id="numbers" checked> Numeri (0-9)</label>
                 <label><input type="checkbox" id="symbols"> Simboli (!@#$%^&*)</label>
+                <label><input type="checkbox" id="excludeAmbiguous" checked> Escludi caratteri ambigui (0,O,1,l,I,|)</label>
             </div>
 
-            <button id="generateBtn" class="btn-primary">Genera Password</button>
-        </div>
-
-        <div class="results-section" id="resultsSection" style="display: none;">
-            <h2>Password Generate</h2>
-            <div id="passwordsList"></div>
-            <div class="actions">
-                <button id="downloadBtn" class="btn-secondary">Scarica CSV</button>
-                <button id="clearBtn" class="btn-tertiary">Cancella Tutto</button>
+            <button id="generateBtn" class="btn-primary">Genera e Scarica CSV</button>
+            
+            <div class="info-box">
+                <h3>Informazioni:</h3>
+                <ul>
+                    <li>Le password generate sono tutte diverse tra loro</li>
+                    <li>Il file CSV conterrà solo la lista delle password</li>
+                    <li>I caratteri ambigui possono essere esclusi per maggiore leggibilità</li>
+                    <li>Il prefisso verrà aggiunto all'inizio di ogni password</li>
+                </ul>
             </div>
         </div>
     </div>
