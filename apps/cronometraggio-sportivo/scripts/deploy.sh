@@ -21,11 +21,20 @@ if [ ! -f .env ]; then
     echo "📝 Creazione file .env..."
     cp .env.example .env
     echo "⚠️  Ricordati di configurare le variabili in .env"
+    echo "📝 Modifica ora il file .env con le tue credenziali database"
+    read -p "Premi ENTER quando hai configurato .env..."
 fi
 
 # Crea directory necessarie
 echo "📁 Creazione directory..."
-mkdir -p uploads nginx/ssl backups logs
+mkdir -p uploads nginx/ssl backups logs public/icons
+
+# Crea file .gitkeep nelle directory
+touch uploads/.gitkeep
+touch backups/.gitkeep  
+touch logs/.gitkeep
+touch nginx/ssl/.gitkeep
+touch public/icons/.gitkeep
 
 # Build dell'applicazione
 echo "🔨 Build dell'applicazione..."
@@ -51,12 +60,14 @@ docker-compose ps
 echo "🏥 Test health check..."
 curl -f http://localhost:3002/api/health || echo "⚠️  Health check fallito"
 
+echo ""
 echo "✅ Deploy completato!"
 echo "📱 App disponibile su: http://localhost:3002"
 echo "📊 Database: localhost:5432"
 echo ""
 echo "📋 Prossimi passi:"
-echo "   1. Configura le variabili in .env"
+echo "   1. Configura Nginx reverse proxy"
 echo "   2. Imposta SSL/TLS per produzione"
 echo "   3. Configura backup automatici"
 echo "   4. Setup monitoring e logging"
+echo "   5. Configura Cloudflare DNS"
