@@ -1,0 +1,11 @@
+# uploads/.gitkeep
+# Mantiene la directory uploads nel repository
+
+# backups/.gitkeep  
+# Mantiene la directory backups nel repository
+
+# logs/.gitkeep
+# Mantiene la directory logs nel repository
+
+# nginx/ssl/.gitkeep
+# Mantiene la directory nginx/ssl nel repository
