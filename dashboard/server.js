@@ -89,7 +89,7 @@ app.get('/manual-pull', (req, res) => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual Git Pull - Bakukko</title>
+    <title>Manual Git Pull</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { 
@@ -344,8 +344,8 @@ app.get('/', (req, res) => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfolio Bakukko - Applicazioni web professionali">
-    <title>Portfolio Bakukko</title>
+    <meta name="description" content="Portfolio Mauro - Applicazioni utili">
+    <title>Portfolio Mauro</title>
     <style>
       * {
         margin: 0;
@@ -518,8 +518,8 @@ app.get('/', (req, res) => {
   <body>
     <div class="container">
       <header class="header">
-        <h1>Portfolio Bakukko</h1>
-        <p>Applicazioni web professionali</p>
+        <h1>Portfolio Mauro</h1>
+        <p>Applicazioni web per il lavoro</p>
       </header>
       
       <main class="content">
