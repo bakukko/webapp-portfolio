@@ -544,6 +544,11 @@ app.get('/', (req, res) => {
               Apri Applicazione
             </a>
           </article>
+          <div class="app-card">
+  <h3>Cronometraggio Sportivo</h3>
+  <p>Sistema di cronometraggio per eventi sportivi con gestione atleti e tempi.</p>
+  <a href="https://app3.rossettimauro.work" class="app-link">Apri App</a>
+</div>
           
           <article class="app-card">
             <h3>⚙️ Admin Panel</h3>
