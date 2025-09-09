@@ -1,0 +1,89 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run linter
+      run: npm run lint:check
+    
+    - name: Run tests
+      run: npm run test:ci
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: test_db
+        DB_USER: postgres
+        DB_PASSWORD: test_password
+        NODE_ENV: test
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t cronometraggio-sportivo .
+    
+    - name: Run container tests
+      run: |
+        docker run -d --name test-container -p 3002:3002 cronometraggio-sportivo
+        sleep 30
+        curl -f http://localhost:3002/api/health
+        docker stop test-container
+
+  deploy:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to production
+      run: |
+        echo "🚀 Deployment to production would happen here"
+        # Add your deployment logic here
+        # e.g., SSH to server, pull changes, restart services
